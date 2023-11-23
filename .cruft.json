@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/DHARPA-Project/kiara_plugin.develop.git",
+  "commit": "e2d43d57283f53eaf5144915075567eff38d738a",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "full_name": "Mariella De Crouy Chanel",
+      "email": "mariella.decrouychanel@uni.lu",
+      "project_name": "topic_modelling",
+      "project_slug": "topic_modelling",
+      "project_short_description": "A Kiara plugin toho create a Topic Modelling workflow.",
+      "github_user": "DHARPA-Project",
+      "anaconda_user": "dharpa",
+      "_template": "https://github.com/DHARPA-Project/kiara_plugin.develop.git"
+    }
+  },
+  "directory": null
+}

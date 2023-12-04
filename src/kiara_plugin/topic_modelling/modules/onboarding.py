@@ -109,20 +109,17 @@ class CreateTableFromZenodo(KiaraModule):
         file_name = inputs.get_value_data("file_name")
         url = f"https://zenodo.org/record/{doi}/files/{file_name}"
 
-        # Download and extract the zip file
-        urllib.request.urlretrieve(url, "temp.zip")
-        with zipfile.ZipFile("temp.zip", 'r') as zip_ref:
-            zip_ref.extractall("temp_folder")
+        response = urllib.request.urlopen(url)
+        zip_file_bytes = io.BytesIO(response.read())
 
         # Process text files and create the table
         file_names = []
         file_contents = []
-        for root, dirs, files in os.walk("temp_folder"):
-            for file in files:
+        with zipfile.ZipFile(zip_file_bytes, 'r') as zip_ref:
+            for file in zip_ref.namelist():
                 if file.endswith(".txt"):
-                    file_path = os.path.join(root, file)
-                    with open(file_path, 'r') as f:
-                        content = f.read()
+                    with zip_ref.open(file) as f:
+                        content = f.read().decode('utf-8')  # Assuming text files are UTF-8 encoded
                         file_names.append(file)
                         file_contents.append(content)
 

@@ -7,7 +7,7 @@ import io
 import os
 import polars as pl
 
-class GetUrlTextFilesModule(KiaraModule):
+class CreateTableFromUrl(KiaraModule):
     """
     This module retrieves text files from a specified sub-path within a zip file hosted at a given URL.
     It outputs a table with two columns: one for the file names and the other for the content of these files.

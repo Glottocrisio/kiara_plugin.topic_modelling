@@ -5,7 +5,7 @@ import urllib.request
 import zipfile
 import io
 import os
-import pandas as pd
+import polars as pl
 
 class GetUrlTextFilesModule(KiaraModule):
     """
@@ -15,7 +15,7 @@ class GetUrlTextFilesModule(KiaraModule):
     Dependencies:
     - urllib.request: https://docs.python.org/3/library/urllib.request.html
     - zipfile: https://docs.python.org/3/library/zipfile.html
-    - pandas: https://pandas.pydata.org/
+    - polars: https://www.pola.rs/
     """
 
     _module_type_name = "topic_modelling.create.table.from.url"
@@ -59,7 +59,7 @@ class GetUrlTextFilesModule(KiaraModule):
                     file_name = os.path.basename(file)
                     file_contents.append({'file_name': file_name, 'content': content})
 
-            return pd.DataFrame(file_contents)
-        
+            return pl.DataFrame(file_contents)
         except Exception as e:
+            # Handle exceptions
             raise e

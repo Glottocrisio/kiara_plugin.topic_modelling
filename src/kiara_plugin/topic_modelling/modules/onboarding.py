@@ -18,7 +18,7 @@ class CreateTableFromUrl(KiaraModule):
     - polars: https://www.pola.rs/
     """
 
-    _module_type_name = "topic_modelling.create.table.from.url"
+    _module_type_name = "topic_modelling.create_table_from_url"
 
     def create_inputs_schema(self):
         return {
@@ -76,7 +76,7 @@ class CreateTableFromZenodo(KiaraModule):
     - polars: https://www.pola.rs/
     """
 
-    _module_type_name = "topic_modelling.create.table.from.zenodo"
+    _module_type_name = "topic_modelling.create_table_from_zenodo"
 
     def create_inputs_schema(self):
         return {

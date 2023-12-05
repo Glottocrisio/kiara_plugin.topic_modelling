@@ -29,7 +29,8 @@ class CreateTableFromUrl(KiaraModule):
             },
             "sub_path": {
                 "type": "string",
-                "doc": "Sub-path within the zip file to look for text files."
+                "doc": "Sub-path within the zip file to look for text files.",
+                "optional": True,
             }
         }
 
@@ -53,7 +54,7 @@ class CreateTableFromUrl(KiaraModule):
             file_contents = []
             
             for file in zip_file.namelist():
-                if file.startswith(sub_path) and file.endswith('.txt'):
+                if (not sub_path or file.startswith(sub_path)) and file.endswith('.txt'):
                     with zip_file.open(file) as f:
                         content = f.read().decode('utf-8')
                     file_name = os.path.basename(file)

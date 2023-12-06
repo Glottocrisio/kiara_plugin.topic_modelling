@@ -119,7 +119,7 @@ class CreateTableFromZenodo(KiaraModule):
                 if file.endswith(".txt"):
                     with zip_ref.open(file) as f:
                         content = f.read().decode('utf-8')  # Assuming text files are UTF-8 encoded
-                        file_names.append(file)
+                        file_names.append(os.path.basename(file))
                         file_contents.append(content)
 
         # Create a table with polars

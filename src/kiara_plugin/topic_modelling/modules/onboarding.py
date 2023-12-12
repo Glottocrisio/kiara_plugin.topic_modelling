@@ -8,6 +8,9 @@ import os
 import polars as pl
 import pyarrow as pa
 
+# At the moment these modules are separate, until more onboarding scenarios are covered, but these modules may
+# ultimately be grouped as one
+
 class CreateTableFromUrl(KiaraModule):
     """
     This module retrieves text files from a specified sub-path within a zip file hosted at a given URL.

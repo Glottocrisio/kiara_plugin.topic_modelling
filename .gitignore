@@ -65,3 +65,6 @@ ci/conda/kiara_plugin.topic_modelling/meta.yaml
 .pixi
 pixi.lock
 dev.py
+
+*.zip
+**/temp_folder/

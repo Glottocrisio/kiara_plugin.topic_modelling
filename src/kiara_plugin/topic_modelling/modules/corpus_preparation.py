@@ -28,9 +28,9 @@ class GetLCCNMetadata(KiaraModule):
                 "type": "table",
                 "doc": "The corpus for which we want to get metadata from file names.",
             },
-            "column_name": {
+            "file_name_col": {
                 "type": "string",
-                "doc": "The column containing metadata. In order to work, file names need to comply with LCCN pattern '/sn86069873/1900-01-05/' containing publication reference and date."
+                "doc": "The column containing file names with metadata. In order to work, file names need to comply with LCCN pattern '/sn86069873/1900-01-05/' containing publication reference and date."
             },
             "map": {
                 "type": "list",
@@ -50,7 +50,7 @@ class GetLCCNMetadata(KiaraModule):
     def process(self, inputs, outputs) -> None:
         
         table_obj = inputs.get_value_obj("corpus_table")
-        column_name = inputs.get_value_obj("column_name").data
+        column_name = inputs.get_value_obj("file_name_col").data
         pub_refs, pub_names = None, None
 
         try:
@@ -87,7 +87,7 @@ class GetLCCNMetadata(KiaraModule):
         try:
             sources = sources.with_columns([
                 sources[column_name].apply(get_date).alias('date'),
-                sources[column_name].apply(get_ref).alias('pub_ref')
+                sources[column_name].apply(get_ref).alias('publication_ref')
             ])
         except Exception as e:
 
@@ -96,10 +96,11 @@ class GetLCCNMetadata(KiaraModule):
         try:
             if pub_refs and pub_names:
                 pub_ref_to_name = dict(zip(pub_refs, pub_names))
-                sources = sources.with_column(
-                    sources['pub_ref'].apply(lambda x: pub_ref_to_name.get(x, None)).alias('pub_name')
+                sources = sources.with_columns(
+                    sources['publication_ref'].apply(lambda x: pub_ref_to_name.get(x, None)).alias('publication_name')
                 )
         except Exception as e:
+            print(e)
             pass
 
         try:

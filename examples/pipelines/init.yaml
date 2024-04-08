@@ -12,3 +12,7 @@ steps:
       step_id: create_table
       input_links:
         file_bundle: load_text_files.file_bundle
+    - module_type: topic_modelling.tokenize_corpus
+      step_id: tokenize_corpus
+      input_links:
+        corpus_table: create_table.table

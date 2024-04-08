@@ -57,6 +57,9 @@ black: ## run black
 flake: ## check style with flake8
 	flake8 src/kiara_plugin/topic_modelling tests
 
+ruff: ## run ruff for linting
+	ruff src/kiara_plugin/topic_modelling tests
+
 mypy: ## run mypy
 	mypy  --namespace-packages --explicit-package-base src/kiara_plugin/topic_modelling
 

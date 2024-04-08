@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
-
 from kiara.api import KiaraModule
-import urllib.request
-import zipfile
-import io
-import os
-import polars as pl
-import pyarrow as pa
+
 
 # At the moment these modules are separate, until more onboarding scenarios are covered, but these modules may
 # ultimately be grouped as one
@@ -46,7 +40,12 @@ class CreateTableFromUrl(KiaraModule):
         }
 
     def process(self, inputs, outputs):
-        
+        import urllib.request
+        import zipfile
+        import os
+        import io
+        import polars as pl
+
         url = inputs.get_value_data("url")
         sub_path = inputs.get_value_data("sub_path")
 
@@ -55,14 +54,13 @@ class CreateTableFromUrl(KiaraModule):
                 zip_file = zipfile.ZipFile(io.BytesIO(response.read()))
 
             file_contents = []
-            
             for file in zip_file.namelist():
                 if (not sub_path or file.startswith(sub_path)) and file.endswith('.txt'):
                     with zip_file.open(file) as f:
                         content = f.read().decode('utf-8')
                     file_name = os.path.basename(file)
                     file_contents.append({'file_name': file_name, 'content': content})
-            
+
             pl_df = pl.DataFrame(file_contents)
             pa_table = pl_df.to_arrow()
             outputs.set_value("corpus_table", pa_table)
@@ -71,7 +69,7 @@ class CreateTableFromUrl(KiaraModule):
             # Print exception details
             print(f"An error occurred: {e}")
 
-        
+
 class CreateTableFromZenodo(KiaraModule):
     """
     This module retrieves text files from a specified folder hosted on Zenodo.
@@ -107,6 +105,12 @@ class CreateTableFromZenodo(KiaraModule):
         }
 
     def process(self, inputs, outputs):
+        import os
+        import io
+        import urllib.request
+        import zipfile
+        import polars as pl
+
         doi = inputs.get_value_data("doi")
         file_name = inputs.get_value_data("file_name")
         url = f"https://zenodo.org/record/{doi}/files/{file_name}"

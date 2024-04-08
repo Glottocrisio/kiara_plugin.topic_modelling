@@ -3,8 +3,9 @@
 
 """Tests for `kiara_plugin.topic_modelling` package."""
 
-import kiara_plugin.topic_modelling
 import pytest  # noqa
+
+import kiara_plugin.topic_modelling
 
 
 def test_assert():

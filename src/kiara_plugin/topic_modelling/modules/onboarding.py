@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from kiara.api import KiaraModule
-
+from kiara.exceptions import KiaraProcessingException
 
 # At the moment these modules are separate, until more onboarding scenarios are covered, but these modules may
 # ultimately be grouped as one
@@ -40,34 +40,42 @@ class CreateTableFromUrl(KiaraModule):
         }
 
     def process(self, inputs, outputs):
-        import urllib.request
-        import zipfile
-        import os
         import io
+        import os
+        import zipfile
+
         import polars as pl
+        import requests
 
         url = inputs.get_value_data("url")
         sub_path = inputs.get_value_data("sub_path")
 
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise KiaraProcessingException("Only HTTP and HTTPS URLs are allowed")
+        
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        zip_file = zipfile.ZipFile(io.BytesIO(response.content))
+        
         try:
-            with urllib.request.urlopen(url) as response:
-                zip_file = zipfile.ZipFile(io.BytesIO(response.read()))
-
             file_contents = []
             for file in zip_file.namelist():
-                if (not sub_path or file.startswith(sub_path)) and file.endswith('.txt'):
+                if (not sub_path or file.startswith(sub_path)) and file.endswith(".txt"):
                     with zip_file.open(file) as f:
-                        content = f.read().decode('utf-8')
+                        content = f.read().decode("utf-8")
                     file_name = os.path.basename(file)
-                    file_contents.append({'file_name': file_name, 'content': content})
+                    file_contents.append({"file_name": file_name, "content": content})
 
             pl_df = pl.DataFrame(file_contents)
             pa_table = pl_df.to_arrow()
             outputs.set_value("corpus_table", pa_table)
 
         except Exception as e:
-            # Print exception details
-            print(f"An error occurred: {e}")
+            #TODO: Add more specific exception handling
+            raise KiaraProcessingException(
+                    f"{e}"
+                )
+            
 
 
 class CreateTableFromZenodo(KiaraModule):
@@ -105,27 +113,29 @@ class CreateTableFromZenodo(KiaraModule):
         }
 
     def process(self, inputs, outputs):
-        import os
         import io
-        import urllib.request
+        import os
         import zipfile
+
         import polars as pl
+        import requests
 
         doi = inputs.get_value_data("doi")
         file_name = inputs.get_value_data("file_name")
         url = f"https://zenodo.org/record/{doi}/files/{file_name}"
 
-        response = urllib.request.urlopen(url)
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
         zip_file_bytes = io.BytesIO(response.read())
 
         # Process text files and create the table
         file_names = []
         file_contents = []
-        with zipfile.ZipFile(zip_file_bytes, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_file_bytes, "r") as zip_ref:
             for file in zip_ref.namelist():
                 if file.endswith(".txt"):
                     with zip_ref.open(file) as f:
-                        content = f.read().decode('utf-8')  # Assuming text files are UTF-8 encoded
+                        content = f.read().decode("utf-8")  # Assuming text files are UTF-8 encoded
                         file_names.append(os.path.basename(file))
                         file_contents.append(content)
 

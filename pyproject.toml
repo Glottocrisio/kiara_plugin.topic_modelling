@@ -25,8 +25,9 @@ formats = ["sdist", "bdist_wheel"]
 
 [project]
 name = "kiara_plugin.topic_modelling"
-description = "A Kiara plugin toho create a Topic Modelling workflow."
+description = "A Kiara plugin to create a Topic Modelling workflow."
 authors = [
+    {name = "Dr Lorella Viola", email = "lorella.viola@uni.lu"},
     {name = "Mariella De Crouy Chanel", email = "mariella.decrouychanel@uni.lu"}
 ]
 readme = "README.md"
@@ -50,6 +51,7 @@ dependencies = [
     "kiara>=0.5.6,<0.6.0",
     "kiara_plugin.core_types>=0.5.0,<0.6.0",
     "kiara-plugin.tabular>=0.5.1,<0.6.0",
+    "types-requests",
 ]
 dynamic = ["version"]
 

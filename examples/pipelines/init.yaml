@@ -1,0 +1,14 @@
+pipeline_name: init_tm_worflow
+doc: |
+  Onboards some data that can be used with operations provided by the topic modelling plugin.
+
+steps:
+    - module_type: import.local.file_bundle
+      module_config:
+        include_file_types:
+          - ".txt"
+      step_id: load_text_files
+    - module_type: create.table.from.file_bundle
+      step_id: create_table
+      input_links:
+        file_bundle: load_text_files.file_bundle

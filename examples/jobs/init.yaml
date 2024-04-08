@@ -1,0 +1,5 @@
+operation: "${this_dir}/../pipelines/init.yaml"
+inputs:
+  load_text_files__path: "${this_dir}/../data/text_corpus/data"
+save:
+  create_table__table: "corpus_table"

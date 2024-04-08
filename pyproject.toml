@@ -242,3 +242,6 @@ plugins = [
 [[tool.mypy.overrides]]
 module = ["placholder.dummy.*"]
 ignore_missing_imports = true
+
+[tool.flake8]
+max-line-length = 200

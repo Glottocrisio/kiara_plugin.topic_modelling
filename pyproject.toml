@@ -51,7 +51,9 @@ dependencies = [
     "kiara>=0.5.6,<0.6.0",
     "kiara_plugin.core_types>=0.5.0,<0.6.0",
     "kiara-plugin.tabular>=0.5.1,<0.6.0",
-    "types-requests",
+    "duckdb==0.9.2",
+    "polars==0.19.19",
+    "types-requests==2.31.0.20240406",
 ]
 dynamic = ["version"]
 

@@ -1,7 +1,7 @@
 [project]
 name = "kiara-plugin-topic_modelling"
 version = "0.1.0"
-description = "A Kiara plugin toho create a Topic Modelling workflow."
+description = "A Kiara plugin to create a Topic Modelling workflow."
 authors = ["Mariella De Crouy Chanel <mariella.decrouychanel@uni.lu>"]
 channels = ["conda-forge", "dharpa"]
 platforms = ["linux-64", "win-64", "osx-64", "osx-arm64"]

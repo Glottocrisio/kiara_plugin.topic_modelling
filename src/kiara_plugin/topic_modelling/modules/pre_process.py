@@ -3,7 +3,7 @@ from kiara.api import KiaraModule
 from kiara.exceptions import KiaraProcessingException
 
 
-class TokenizeCorpus(KiaraModule):
+class TokenizeArray(KiaraModule):
     """
     This module creates tokens from an array or from a table.
     It returns a table containing the initial array or table, and the tokens as a new column.

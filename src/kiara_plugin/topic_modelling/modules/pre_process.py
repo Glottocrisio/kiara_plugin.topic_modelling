@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from typing import Optional, List
 from kiara.api import KiaraModule
 from kiara.exceptions import KiaraProcessingException
+from pyarrow import Table as PyArrowTable
 
-#TODO add type hints
 
 class TokenizeCorpus(KiaraModule):
     """
@@ -57,8 +58,8 @@ class TokenizeCorpus(KiaraModule):
 
         nltk.download("punkt")
 
-        tokenized_list = None
-        table_pa = None
+        tokenized_list: Optional[List[str]] = None
+        table_pa: Optional[PyArrowTable] = None
         
         # check that both inputs table and array are not set simultaneously
         if inputs.get_value_obj("corpus_table").is_set and inputs.get_value_obj("corpus_array").is_set:
@@ -73,7 +74,7 @@ class TokenizeCorpus(KiaraModule):
                 raise KiaraProcessingException("The 'column_name' input must be set when 'corpus_table' is set.")
             
             column_name: str = inputs.get_value_obj("column_name").data
-            table_cols: list = table_pa.column_names
+            table_cols: List[str] = table_pa.column_names
 
             # check that the column name provided exists in the table
             if column_name not in table_cols:
@@ -90,7 +91,7 @@ class TokenizeCorpus(KiaraModule):
         
         corpus_list = corpus_array_pa.to_pylist()
 
-        def tokenize(text, tokenize_by_character=False):
+        def tokenize(text: str, tokenize_by_character:bool = False) -> Optional[List[str]]:
             if not tokenize_by_character:
                 try:
                     return nltk.word_tokenize(str(text))

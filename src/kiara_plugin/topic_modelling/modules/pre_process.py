@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Optional, List
+from typing import List, Optional
 from kiara.api import KiaraModule
 from kiara.exceptions import KiaraProcessingException
-from pyarrow import Table as PyArrowTable
 
 
 class TokenizeCorpus(KiaraModule):
@@ -54,12 +53,12 @@ class TokenizeCorpus(KiaraModule):
 
         import nltk  # type: ignore
         import pyarrow as pa  # type: ignore
-        from nltk.tokenize.simple import CharTokenizer
+        from nltk.tokenize.simple import CharTokenizer # type: ignore
 
         nltk.download("punkt")
 
-        tokenized_list: Optional[List[str]] = None
-        table_pa: Optional[PyArrowTable] = None
+        tokenized_list = None
+        table_pa = None
         
         # check that both inputs table and array are not set simultaneously
         if inputs.get_value_obj("corpus_table").is_set and inputs.get_value_obj("corpus_array").is_set:
@@ -91,7 +90,7 @@ class TokenizeCorpus(KiaraModule):
         
         corpus_list = corpus_array_pa.to_pylist()
 
-        def tokenize(text: str, tokenize_by_character:bool = False) -> Optional[List[str]]:
+        def tokenize(text: str, tokenize_by_character:bool = False):
             if not tokenize_by_character:
                 try:
                     return nltk.word_tokenize(str(text))

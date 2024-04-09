@@ -13,7 +13,7 @@ class TokenizeArray(KiaraModule):
     - NLTK: https://www.nltk.org/
     """
 
-    _module_type_name = "topic_modelling.tokenize_corpus"
+    _module_type_name = "topic_modelling.tokenize_array"
 
     def create_inputs_schema(self):
         return {

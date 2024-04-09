@@ -3,7 +3,6 @@ from kiara.api import KiaraModule
 from kiara.exceptions import KiaraProcessingException
 
 #TODO add type hints
-#TODO add tokenization by character
 
 class TokenizeCorpus(KiaraModule):
     """
@@ -54,6 +53,8 @@ class TokenizeCorpus(KiaraModule):
 
         import nltk  # type: ignore
         import pyarrow as pa  # type: ignore
+        from nltk.tokenize.simple import CharTokenizer
+
         nltk.download("punkt")
 
         tokenized_list = None
@@ -87,21 +88,42 @@ class TokenizeCorpus(KiaraModule):
             corpus_array = inputs.get_value_data("corpus_array")
             corpus_array_pa = corpus_array.arrow_array
         
-        if not inputs.get_value_data("tokenize_by_character"):
-            corpus_list = corpus_array_pa.to_pylist()
+        corpus_list = corpus_array_pa.to_pylist()
 
-            def tokenize(text):
+        def tokenize(text, tokenize_by_character=False):
+            if not tokenize_by_character:
                 try:
                     return nltk.word_tokenize(str(text))
                 except Exception:
                     return None
+            else:
+                try:
+                    tokenizer = CharTokenizer()
+                    return tokenizer.tokenize(text)
+                except Exception:
+                    return None
+
+
+        if not inputs.get_value_data("tokenize_by_character"):
+            
             try:
                 tokenized_list = [tokenize(str(x)) for x in corpus_list]
                 tokens_array = pa.array(tokenized_list)
 
             except Exception as e:
                 raise KiaraProcessingException(
-                    f"An error occurred while tokenizing the corpus: {e}."
+                    f"An error occurred while tokenizing the corpus by word: {e}."
+                )
+        
+        else:
+        
+            try:
+                tokenized_list = [tokenize(str(x), tokenize_by_character=True) for x in corpus_list]
+                tokens_array = pa.array(tokenized_list)
+
+            except Exception as e:
+                raise KiaraProcessingException(
+                    f"An error occurred while tokenizing the corpus by character: {e}."
                 )
             
         if table_pa is not None:

@@ -8,7 +8,7 @@
       "email": "mariella.decrouychanel@uni.lu",
       "project_name": "topic_modelling",
       "project_slug": "topic_modelling",
-      "project_short_description": "A Kiara plugin toho create a Topic Modelling workflow.",
+      "project_short_description": "A Kiara plugin to create a Topic Modelling workflow.",
       "github_user": "DHARPA-Project",
       "anaconda_user": "dharpa",
       "_template": "https://github.com/DHARPA-Project/kiara_plugin.develop.git"

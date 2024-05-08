@@ -1,0 +1,9 @@
+operation: "${this_dir}/../pipelines/create_dates.yaml"
+inputs:
+  extract_date_1__text: "2022-01-01"
+  extract_date_2__text: "2023-01-01"
+  extract_date_3__text: "2024-01-01"
+save:
+  extract_date_1__date: "date_1"
+  extract_date_2__date: "date_2"
+  extract_date_3__date: "date_3"

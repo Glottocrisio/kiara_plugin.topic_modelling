@@ -1,0 +1,3 @@
+operation: date.extract_from_string
+inputs:
+  text: "xxxx 01.02.2022 xxx"

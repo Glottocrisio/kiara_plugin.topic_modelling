@@ -1,18 +1,18 @@
 channels:
-  - conda-forge
   - dharpa
+  - conda-forge
 
 host_requirements:
   - pip
   - python
-  - setuptools<=63
+  - setuptools
   - setuptools_scm
 
 test:
   imports:
     - kiara_plugin.topic_modelling
   source_files:
-    - tests
-    - examples
+    - tests/
+    - examples/
   commands:
     - kiara module list

@@ -16,14 +16,18 @@ import uuid
 from pathlib import Path
 
 import pytest
+from _pytest.compat import NotSetType
 
+from kiara.api import JobDesc, KiaraAPI
 from kiara.context import KiaraConfig
-from kiara.api import KiaraAPI
 from kiara.interfaces.python_api.models.job import JobTest
-from kiara.utils.testing import get_tests_for_job, list_job_descs
+from kiara.utils.testing import get_init_job, get_tests_for_job, list_job_descs
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-JOBS_FOLDER = Path(os.path.join(ROOT_DIR, "examples", "jobs"))
+JOBS_FOLDERS = [
+    Path(os.path.join(ROOT_DIR, "tests", "resources", "jobs")),
+    Path(os.path.join(ROOT_DIR, "examples", "jobs")),
+]
 
 
 def create_temp_dir():
@@ -36,6 +40,14 @@ def create_temp_dir():
     return instance_path
 
 
+def get_job_alias(job_desc: JobDesc) -> str:
+
+    if isinstance(job_desc, NotSetType):
+        return "-- no example jobs --"
+
+    return job_desc.job_alias
+
+
 @pytest.fixture
 def kiara_api() -> KiaraAPI:
 
@@ -45,8 +57,35 @@ def kiara_api() -> KiaraAPI:
     return api
 
 
-@pytest.fixture(params=list_job_descs(JOBS_FOLDER))
-def example_job_test(request, kiara_api) -> JobTest:
+@pytest.fixture
+def kiara_api_init_example() -> KiaraAPI:
+    instance_path = create_temp_dir()
+    kc = KiaraConfig.create_in_folder(instance_path)
+    api = KiaraAPI(kc)
+
+    init_jobs = []
+    for jobs_folder in JOBS_FOLDERS:
+        init_job = get_init_job(jobs_folder)
+        if init_job is not None:
+            init_jobs.append(init_job)
+
+    if not init_jobs:
+        return api
+
+    for init_job in init_jobs:
+        results = api.run_job(init_job, comment="Init example job")
+
+        if not init_job.save:
+            continue
+
+        for field_name, alias_name in init_job.save.items():
+            api.store_value(results[field_name], alias_name)
+
+    return api
+
+
+@pytest.fixture(params=list_job_descs(JOBS_FOLDERS), ids=get_job_alias)
+def example_job_test(request, kiara_api_init_example) -> JobTest:
 
     job_tests_folder = Path(os.path.join(ROOT_DIR, "tests", "job_tests"))
 
@@ -55,7 +94,7 @@ def example_job_test(request, kiara_api) -> JobTest:
         job_alias=job_desc.job_alias, job_tests_folder=job_tests_folder
     )
 
-    job_test = JobTest(kiara_api=kiara_api, job_desc=job_desc, tests=tests)
+    job_test = JobTest(kiara_api=kiara_api_init_example, job_desc=job_desc, tests=tests)
     return job_test
 
 

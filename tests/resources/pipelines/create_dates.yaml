@@ -1,0 +1,8 @@
+pipeline_name: "init_core_types_plugin"
+steps:
+  - module_type: "date.extract_from_string"
+    step_id: "extract_date_1"
+  - module_type: "date.extract_from_string"
+    step_id: "extract_date_2"
+  - module_type: "date.extract_from_string"
+    step_id: "extract_date_3"

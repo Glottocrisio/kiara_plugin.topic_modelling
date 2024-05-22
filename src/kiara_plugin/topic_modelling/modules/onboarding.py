@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from kiara.api import KiaraModule
-from kiara.exceptions import KiaraProcessingException
 
 # These modules are temporary and will be removed in the future when features availables from Kiara onboarding modules.
 

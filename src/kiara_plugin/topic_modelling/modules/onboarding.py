@@ -2,80 +2,7 @@
 from kiara.api import KiaraModule
 from kiara.exceptions import KiaraProcessingException
 
-# At the moment these modules are separate, until more onboarding scenarios are covered, but these modules may
-# ultimately be grouped as one
-
-class CreateTableFromUrl(KiaraModule):
-    """
-    This module retrieves text files from a specified sub-path within a zip file hosted at a given URL.
-    It outputs a table with two columns: one for the file names and the other for the content of these files.
-
-    Dependencies:
-    - urllib.request: https://docs.python.org/3/library/urllib.request.html
-    - zipfile: https://docs.python.org/3/library/zipfile.html
-    - polars: https://www.pola.rs/
-    """
-
-    _module_type_name = "topic_modelling.create_table_from_url"
-
-    def create_inputs_schema(self):
-        return {
-            "url": {
-                "type": "string",
-                "doc": "URL of the zip file to retrieve text files from."
-            },
-            "sub_path": {
-                "type": "string",
-                "doc": "Sub-path within the zip file to look for text files.",
-                "optional": True,
-            }
-        }
-
-    def create_outputs_schema(self):
-        return {
-            "corpus_table": {
-                "type": "table",
-                "doc": "Table with file names and contents."
-            }
-        }
-
-    def process(self, inputs, outputs):
-        import io
-        import os
-        import zipfile
-
-        import polars as pl
-        import requests
-
-        url = inputs.get_value_data("url")
-        sub_path = inputs.get_value_data("sub_path")
-
-        if not (url.startswith("http://") or url.startswith("https://")):
-            raise KiaraProcessingException("Only HTTP and HTTPS URLs are allowed")
-        
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        zip_file = zipfile.ZipFile(io.BytesIO(response.content))
-        
-        try:
-            file_contents = []
-            for file in zip_file.namelist():
-                if (not sub_path or file.startswith(sub_path)) and file.endswith(".txt"):
-                    with zip_file.open(file) as f:
-                        content = f.read().decode("utf-8")
-                    file_name = os.path.basename(file)
-                    file_contents.append({"file_name": file_name, "content": content})
-
-            pl_df = pl.DataFrame(file_contents)
-            pa_table = pl_df.to_arrow()
-            outputs.set_value("corpus_table", pa_table)
-
-        except Exception as e:
-            #TODO: Add more specific exception handling
-            raise KiaraProcessingException(
-                    f"{e}"
-                )
-            
+# These modules are temporary and will be removed in the future when features availables from Kiara onboarding modules.
 
 
 class CreateTableFromZenodo(KiaraModule):
@@ -84,10 +11,6 @@ class CreateTableFromZenodo(KiaraModule):
     It takes the DOI and the name of the file as inputs.
     It outputs a table with two columns: one for the file names and the other for the content of these files.
 
-    Dependencies:
-    - urllib.request: https://docs.python.org/3/library/urllib.request.html
-    - zipfile: https://docs.python.org/3/library/zipfile.html
-    - polars: https://www.pola.rs/
     """
 
     _module_type_name = "topic_modelling.create_table_from_zenodo"

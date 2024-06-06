@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from kiara.api import KiaraModule
+from kiara.exceptions import KiaraProcessingException
 
-# These modules are temporary and will be removed in the future when features availables from Kiara onboarding modules.
-
+# These module may be removed in the future when the feature is available from Kiara onboarding modules.
 
 class CreateTableFromZenodo(KiaraModule):
     """
@@ -38,7 +38,6 @@ class CreateTableFromZenodo(KiaraModule):
         import io
         import os
         import zipfile
-
         import polars as pl
         import requests
 
@@ -46,23 +45,31 @@ class CreateTableFromZenodo(KiaraModule):
         file_name = inputs.get_value_data("file_name")
         url = f"https://zenodo.org/record/{doi}/files/{file_name}"
 
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        zip_file_bytes = io.BytesIO(response.read())
+        try:
+            # Make the request to fetch the zip file
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()  # Check for HTTP errors
 
-        # Process text files and create the table
-        file_names = []
-        file_contents = []
-        with zipfile.ZipFile(zip_file_bytes, "r") as zip_ref:
-            for file in zip_ref.namelist():
-                if file.endswith(".txt"):
-                    with zip_ref.open(file) as f:
-                        content = f.read().decode("utf-8")  # Assuming text files are UTF-8 encoded
-                        file_names.append(os.path.basename(file))
-                        file_contents.append(content)
+            # Use the content attribute to get the raw bytes of the response
+            zip_file_bytes = io.BytesIO(response.content)
 
-        # Create a table with polars
-        pl_df = pl.DataFrame({"file_name": file_names, "content": file_contents})
-        pa_table = pl_df.to_arrow()
+            # Process the zip file to extract text files and create the table
+            file_names = []
+            file_contents = []
+            with zipfile.ZipFile(zip_file_bytes, "r") as zip_ref:
+                for file in zip_ref.namelist():
+                    if file.endswith(".txt"):
+                        with zip_ref.open(file) as f:
+                            content = f.read().decode("utf-8")
+                            file_names.append(os.path.basename(file))
+                            file_contents.append(content)
+
+            pl_df = pl.DataFrame({"file_name": file_names, "content": file_contents})
+            pa_table = pl_df.to_arrow()
+        
+        except Exception as e:
+            raise KiaraProcessingException(
+                    f"Failed to fetch the zip file: {e}"
+                )
 
         outputs.set_value("corpus_table", pa_table)

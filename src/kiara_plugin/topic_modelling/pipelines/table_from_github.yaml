@@ -1,0 +1,12 @@
+pipeline_name: create.table_from_github_files
+doc: |
+  Onboards text files from a Github repository.
+
+steps:
+    - module_type: download.file_bundle.from.github
+      step_id: download_github_files
+    - module_type: create.table.from.file_bundle
+      step_id: create_table_from_files
+      input_links:
+        file_bundle: download_github_files.file_bundle
+ 

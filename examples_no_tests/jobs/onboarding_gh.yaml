@@ -1,0 +1,6 @@
+operation: create.table_from_github_files
+inputs:
+  download_github_files__user: "DHARPA-Project"
+  download_github_files__repo: "kiara.examples"
+  download_github_files__sub_path: "kiara.examples-main/examples/workshops/dh_benelux_2023/data"
+  download_github_files__include_files: ["txt"]

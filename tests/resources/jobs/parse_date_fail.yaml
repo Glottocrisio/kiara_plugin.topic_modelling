@@ -1,3 +1,0 @@
-operation: date.extract_from_string
-inputs:
-  text: "xxxx 32.32.2022 xxx"

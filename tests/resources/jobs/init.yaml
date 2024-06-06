@@ -1,9 +1,7 @@
-operation: "${this_dir}/../pipelines/create_dates.yaml"
+operation: "${this_dir}/../pipelines/init.yaml"
 inputs:
-  extract_date_1__text: "2022-01-01"
-  extract_date_2__text: "2023-01-01"
-  extract_date_3__text: "2024-01-01"
+  load_text_files__path: "${this_dir}/../data/text_corpus/data"
+  create_array__column_name: "content"
 save:
-  extract_date_1__date: "date_1"
-  extract_date_2__date: "date_2"
-  extract_date_3__date: "date_3"
+  create_table__table: "corpus_table"
+  tokenize_corpus__tokens_array: "tokens_array"

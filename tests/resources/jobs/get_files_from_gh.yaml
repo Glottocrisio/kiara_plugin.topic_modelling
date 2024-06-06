@@ -1,6 +1,0 @@
-operation: download.file_bundle.from.github
-inputs:
-    "user": "DHARPA-Project"
-    "repo": "kiara.examples"
-    "sub_path": "kiara.examples-main/examples/workshops/dh_benelux_2023/data"
-    "include_files": ["txt"]

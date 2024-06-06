@@ -1,7 +1,0 @@
-operation: "${this_dir}/../pipelines/init.yaml"
-inputs:
-  load_text_files__path: "${this_dir}/../data/text_corpus/data"
-  create_array__column_name: "content"
-save:
-  create_table__table: "corpus_table"
-  tokenize_corpus__tokens_table: "tokens_table"

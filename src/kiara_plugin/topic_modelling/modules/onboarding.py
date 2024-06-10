@@ -38,6 +38,7 @@ class CreateTableFromZenodo(KiaraModule):
         import io
         import os
         import zipfile
+
         import polars as pl
         import requests
 

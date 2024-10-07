@@ -20,3 +20,7 @@ steps:
       step_id: tokenize_corpus
       input_links:
         corpus_array: create_array.array
+    - module_type: topic_modelling.lda
+      step_id: lda
+      input_links:
+        tokens_array: tokenize_corpus.tokens_array

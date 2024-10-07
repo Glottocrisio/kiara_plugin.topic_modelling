@@ -50,8 +50,10 @@ classifiers = [
 dependencies = [
     "kiara>=0.5.10,<0.6.0",
     "kiara-plugin.tabular>=0.5.4,<0.6.0",
+    "kiara_plugin.onboarding==0.5.1",
     "types-requests==2.31.0.20240406",
     "nltk==3.8.1",
+    "requests==2.32.3",
 ]
 dynamic = ["version"]
 

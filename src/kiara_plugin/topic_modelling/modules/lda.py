@@ -61,7 +61,7 @@ class RunLda(KiaraModule):
 
     def create_outputs_schema(self):
         return {
-            "most_commom_words": {
+            "most_common_words": {
                 "type": "list",
                 "doc": "The 15 most common words overall."
             },
@@ -79,15 +79,23 @@ class RunLda(KiaraModule):
         tokens_array = inputs.get_value_data("tokens_array")
         tokens_array_pa = tokens_array.arrow_array
         tokens_list = tokens_array_pa.to_pylist()
+        
         no_below = inputs.get_value_data("no_below")
         no_above = inputs.get_value_data("no_above")
+        
         num_topics = inputs.get_value_data("num_topics")
+        
         passes = inputs.get_value_data("passes")
         iterations = inputs.get_value_data("iterations")
         random_state = inputs.get_value_data("random_state")
 
         id2word = corpora.Dictionary(tokens_list)
-        id2word.filter_extremes(no_below=no_below, no_above=no_above)
+
+        # if no_below is not False:
+        #     id2word.filter_extremes(no_below=no_below)
+        
+        # if no_above is not False:
+        #     id2word.filter_extremes(no_above=no_above)
 
         corpus = [id2word.doc2bow(text) for text in tokens_list]
         model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, iterations=iterations)

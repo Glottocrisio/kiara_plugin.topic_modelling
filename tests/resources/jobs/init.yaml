@@ -2,6 +2,9 @@ operation: "${this_dir}/../pipelines/init.yaml"
 inputs:
   load_text_files__path: "${this_dir}/../data/text_corpus/data"
   create_array__column_name: "content"
+  preprocess_tokens__lowercase: true
+  preprocess_tokens__isalpha: true
+  preprocess_tokens__min_length: 3
   lda__num_topics: 3
 save:
   create_table__table: "corpus_table"

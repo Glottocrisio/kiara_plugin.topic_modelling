@@ -82,3 +82,87 @@ class TokenizeArray(KiaraModule):
                 )
         
         outputs.set_value("tokens_array", tokens_array)
+
+class PreprocessTokens(KiaraModule):
+    """
+    This module offers pre-processing options for an array of tokens.
+
+    Dependencies:
+    - NLTK: https://www.nltk.org/
+    """
+
+    _module_type_name = "topic_modelling.preprocess_tokens"
+
+    def create_inputs_schema(self):
+        return {
+            "tokens_array": {
+                "type": "array",
+                "doc": "Array that contains the tokens to pre-process.",
+            },
+            "lowercase": {
+                "type": "boolean",
+                "doc": "Whether to lowercase the tokens.",
+                "optional": True,
+                "default": False
+            },
+            "isalpha": {
+                "type": "boolean",
+                "doc": "Whether to remove tokens that contain other characters than letters.",
+                "optional": True,
+                "default": False
+            },
+            "min_length": {
+                "type": "integer",
+                "doc": "Whether to remove tokens that contain less than min_length characters.",
+                "optional": True,
+                "default": False
+            }
+        }
+
+    def create_outputs_schema(self):
+        return {
+            "tokens_array": {
+                "type": "array",
+                "doc": "The array that contains the pre-processed tokens."
+            }
+        }
+
+    def process(self, inputs, outputs):
+        import polars as pl # type: ignore
+        import pyarrow as pa # type: ignore
+
+        tokens_array = inputs.get_value_data("tokens_array")
+        tokens_array_pa = tokens_array.arrow_array
+        
+        tokens_list = tokens_array_pa.to_pylist()
+
+        do_lowercase = inputs.get_value_data("lowercase")
+        do_isalpha = inputs.get_value_data("isalpha")
+        min_length = inputs.get_value_data("min_length")
+
+        def preprocess_token(token):
+            if not isinstance(token, str):
+                token = str(token)
+            
+            if do_lowercase:
+                token = token.lower()
+            
+            if do_isalpha and not token.isalpha():
+                return None
+            
+            if min_length and len(token) < min_length:
+                return None
+            
+            return token
+
+        def process_nested(item):
+            if isinstance(item, list):
+                return [y for y in (process_nested(subitem) for subitem in item) if y is not None]
+            else:
+                return preprocess_token(item)
+
+
+        processed_tokens = process_nested(tokens_list)
+        processed_array = pa.array(processed_tokens)
+
+        outputs.set_value("tokens_array", processed_array)

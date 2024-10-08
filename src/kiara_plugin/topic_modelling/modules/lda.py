@@ -5,6 +5,7 @@ from kiara.exceptions import KiaraProcessingException
 
 class RunLda(KiaraModule):
     """
+    https://radimrehurek.com/gensim/models/ldamulticore.html
     
     """
 
@@ -74,7 +75,7 @@ class RunLda(KiaraModule):
     def process(self, inputs, outputs):
 
         import gensim  # type: ignore
-        from gensim import corpora, models # type: ignore
+        from gensim import corpora # type: ignore
 
         tokens_array = inputs.get_value_data("tokens_array")
         tokens_array_pa = tokens_array.arrow_array
@@ -89,16 +90,43 @@ class RunLda(KiaraModule):
         iterations = inputs.get_value_data("iterations")
         random_state = inputs.get_value_data("random_state")
 
-        id2word = corpora.Dictionary(tokens_list)
+        try:
+            id2word = corpora.Dictionary(tokens_list)
+        except Exception as e:
+            raise KiaraProcessingException(
+                f"Failed to create dictionary: {e}"
+            )
 
         if not no_below == False:
-            id2word.filter_extremes(no_below=no_below)
+            try:
+                id2word.filter_extremes(no_below=no_below)
+            except Exception as e:
+                raise KiaraProcessingException(
+                    f"Failed to filter extremes with no_below value: {e}"
+                )
 
         if not no_above == False:
+            try:
+                id2word.filter_extremes(no_above=no_above)
+            except Exception as e:
+                raise KiaraProcessingException(
+                    f"Failed to filter extremes with no_above value: {e}"
+                )
             id2word.filter_extremes(no_above=no_above)
 
-        corpus = [id2word.doc2bow(text) for text in tokens_list]
-        model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, iterations=iterations)
+        try:
+            corpus = [id2word.doc2bow(text) for text in tokens_list]
+        except Exception as e:
+            raise KiaraProcessingException(
+                f"Failed to create doc2bow: {e}"
+            )
+        
+        try:
+            model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, iterations=iterations)
+        except Exception as e:
+            raise KiaraProcessingException(
+                f"Failed to run LDA: {e}"
+            )
         
         outputs.set_value("topics", model.print_topics(num_words=30))
         outputs.set_value("most_common_words", id2word.most_common(15))

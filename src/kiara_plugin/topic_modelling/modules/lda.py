@@ -91,15 +91,14 @@ class RunLda(KiaraModule):
 
         id2word = corpora.Dictionary(tokens_list)
 
-        # if no_below is not False:
-        #     id2word.filter_extremes(no_below=no_below)
-        
-        # if no_above is not False:
-        #     id2word.filter_extremes(no_above=no_above)
+        if not no_below == False:
+            id2word.filter_extremes(no_below=no_below)
+
+        if not no_above == False:
+            id2word.filter_extremes(no_above=no_above)
 
         corpus = [id2word.doc2bow(text) for text in tokens_list]
         model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, iterations=iterations)
-        
         
         outputs.set_value("topics", model.print_topics(num_words=30))
         outputs.set_value("most_common_words", id2word.most_common(15))

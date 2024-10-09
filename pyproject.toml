@@ -54,6 +54,7 @@ dependencies = [
     "types-requests==2.31.0.20240406",
     "nltk==3.8.1",
     "requests==2.32.3",
+    "gensim==4.3.3",
 ]
 dynamic = ["version"]
 

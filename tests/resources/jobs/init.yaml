@@ -5,6 +5,8 @@ inputs:
   preprocess_tokens__lowercase: true
   preprocess_tokens__isalpha: true
   preprocess_tokens__min_length: 3
+  create_stopwords_list__languages: ["english","italian"]
+  create_stopwords_list__stopwords_list: ["custom","stopwords"]
   lda__num_topics: 3
 save:
   create_table__table: "corpus_table"

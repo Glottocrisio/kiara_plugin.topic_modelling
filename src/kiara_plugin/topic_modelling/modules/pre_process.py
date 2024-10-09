@@ -87,8 +87,6 @@ class PreprocessTokens(KiaraModule):
     """
     This module offers pre-processing options for an array of tokens.
 
-    Dependencies:
-    - NLTK: https://www.nltk.org/
     """
 
     _module_type_name = "topic_modelling.preprocess_tokens"

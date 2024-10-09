@@ -29,12 +29,6 @@ class RunLda(KiaraModule):
                 "optional": True,
                 "default": False
             },
-            "no_above": {
-                "type": "integer",
-                "doc": "Remove tokens that appear in more than no_above documents.",
-                "optional": True,
-                "default": False
-            },
             "num_topics": {
                 "type": "integer",
                 "doc": "Number of topics to process.",
@@ -43,6 +37,12 @@ class RunLda(KiaraModule):
             "passes": {
                 "type": "integer",
                 "doc": "Number of passes.",
+                "optional": True,
+                "default": False
+            },
+            "chunksize": {
+                "type": "integer",
+                "doc": "Chunksize.",
                 "optional": True,
                 "default": False
             },
@@ -87,6 +87,7 @@ class RunLda(KiaraModule):
         num_topics = inputs.get_value_data("num_topics")
         
         passes = inputs.get_value_data("passes")
+        chunksize = inputs.get_value_data("chunksize")
         iterations = inputs.get_value_data("iterations")
         random_state = inputs.get_value_data("random_state")
 
@@ -122,7 +123,7 @@ class RunLda(KiaraModule):
             )
         
         try:
-            model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, iterations=iterations)
+            model = gensim.models.ldamulticore.LdaMulticore(corpus, id2word=id2word, num_topics=num_topics, random_state=random_state, passes=passes, chunksize=chunksize, iterations=iterations)
         except Exception as e:
             raise KiaraProcessingException(
                 f"Failed to run LDA: {e}"

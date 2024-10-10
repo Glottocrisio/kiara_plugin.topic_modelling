@@ -5,9 +5,11 @@ inputs:
   preprocess_tokens__lowercase: true
   preprocess_tokens__isalpha: true
   preprocess_tokens__min_length: 3
-  create_stopwords_list__languages: ["english","italian"]
-  create_stopwords_list__stopwords_list: ["custom","stopwords"]
+  create_stopwords_list__languages: ['english','italian']
+  create_stopwords_list__stopwords_list: ['custom','stopwords']
   lda__num_topics: 3
 save:
   create_table__table: "corpus_table"
   tokenize_corpus__tokens_array: "tokens_array"
+  create_stopwords_list__stopwords_list: "stopwords_list"
+  remove_stopwords__tokens_array: "tokens_array_no_stopwords"

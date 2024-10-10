@@ -26,7 +26,12 @@ steps:
         tokens_array: tokenize_corpus.tokens_array
     - module_type: topic_modelling.stopwords_list
       step_id: create_stopwords_list
+    - module_type: topic_modelling.remove_stopwords
+      step_id: remove_stopwords
+      input_links:
+        tokens_array: preprocess_tokens.tokens_array
+        stopwords_list: create_stopwords_list.stopwords_list
     - module_type: topic_modelling.lda
       step_id: lda
       input_links:
-        tokens_array: preprocess_tokens.tokens_array
+        tokens_array: remove_stopwords.tokens_array

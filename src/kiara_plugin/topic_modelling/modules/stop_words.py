@@ -64,3 +64,55 @@ class CreateSwList(KiaraModule):
         sw_list.extend(custom_stopwords)
         sw_list = list(dict.fromkeys(sw_list))
         outputs.set_value("stopwords_list", sw_list)
+
+
+class RemoveSw(KiaraModule):
+    """
+    
+    This module removes stop words from an array of tokens.
+    
+    """
+
+    _module_type_name = "topic_modelling.remove_stopwords"
+
+    def create_inputs_schema(self):
+        return {
+            "stopwords_list": {
+                "type": "list",
+                "doc": "A list of stop words to be removed from the tokens.",
+                "optional": False
+            },
+            "tokens_array": {
+                "type": "array",
+                "doc": "An array of tokens.",
+                "optional": False,
+            }
+        }
+
+    def create_outputs_schema(self):
+        return {
+            "tokens_array": {
+                "type": "array",
+                "doc": "The array of tokens without stop words."
+            }
+        }
+
+    def process(self, inputs, outputs):
+        import pyarrow as pa # type: ignore
+        from pyarrow import compute as pc # type: ignore
+        
+        tokens_array = inputs.get_value_data("tokens_array")
+        sw_list = inputs.get_value_data("stopwords_list")
+        
+        stopwords_set = set(sw_list)
+        tokens_array_pa = tokens_array.arrow_array
+        
+        def remove_stopwords(words, stopwords_set):
+            return [word for word in words if word not in stopwords_set]
+
+        try:
+            tokens_nostop = pa.array([remove_stopwords(words, stopwords_set) for words in tokens_array_pa.to_pylist()])
+        except Exception as e:
+            raise KiaraProcessingException(f"An error occurred while removing stop words: {e}")
+
+        outputs.set_value("tokens_array", tokens_nostop)

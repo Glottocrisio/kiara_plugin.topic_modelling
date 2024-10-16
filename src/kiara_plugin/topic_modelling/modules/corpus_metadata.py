@@ -48,7 +48,7 @@ class GetLccnMetadata(KiaraModule):
         import pyarrow as pa # type: ignore
 
         table_obj = inputs.get_value_obj("corpus_table")
-        column_name = inputs.get_value_obj("file_name_col").data
+        column_name = inputs.get_value_obj("column_name").data
 
         
         if table_obj.is_set:

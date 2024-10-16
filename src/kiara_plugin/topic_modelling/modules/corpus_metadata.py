@@ -20,6 +20,7 @@ class GetLccnMetadata(KiaraModule):
             "corpus_table": {
                 "type": "table",
                 "doc": "Table that contains a column with the file names.",
+                "optional": False,
             },
             "column_name": {
                 "type": "string",
@@ -50,24 +51,19 @@ class GetLccnMetadata(KiaraModule):
         table_obj = inputs.get_value_obj("corpus_table")
         column_name = inputs.get_value_obj("column_name").data
 
+        sources = table_obj.data
+            
+        sources_col_names = sources.column_names
+
+        if column_name not in sources_col_names:
+
+            raise KiaraProcessingException(
+                f"Could not find file names column '{column_name}' in the table. Please specify a valid column name manually, using one of: {', '.join(sources_col_names)}"
+            )
         
-        if table_obj.is_set:
-
-            sources = table_obj.data
-            
-            assert sources is not None
-
-            sources_col_names = sources.column_names
-
-            if column_name not in sources_col_names:
-
-                raise KiaraProcessingException(
-                    f"Could not find file names column '{column_name}' in the table. Please specify a valid column name manually, using one of: {', '.join(sources_col_names)}"
-                )
-            
-            sources_data: pa.Table = table_obj.data.arrow_table
-            
-            sources_tb: pl.DataFrame = pl.from_arrow(sources_data) # type: ignore
+        sources_data: pa.Table = table_obj.data.arrow_table
+        
+        sources_tb: pl.DataFrame = pl.from_arrow(sources_data) # type: ignore
 
 
         def get_ref(file):
@@ -78,6 +74,7 @@ class GetLccnMetadata(KiaraModule):
                 return ref_match[0]
 
             except Exception as e:
+                msg = f"There was a problem in the publication reference pattern: {e}"
                 raise KiaraProcessingException(e)
 
         def get_date(file):
@@ -87,7 +84,7 @@ class GetLccnMetadata(KiaraModule):
                     return None
                 return date_match[0]
             except Exception as e:
-                msg = f"Error in get_date: {e}"
+                msg = f"There was a problem in the date pattern: {e}"
                 raise KiaraProcessingException(msg)
 
         
@@ -106,12 +103,10 @@ class GetLccnMetadata(KiaraModule):
 
         except:
             try:
-                augm_sources = sources_tb.with_columns(
-                    [
-                        sources_tb[column_name].map_elements(get_date).alias("date"),
-                        sources_tb[column_name].map_elements(get_ref).alias("publication_ref"),
-                    ]
-                )
+                augm_sources = sources_tb.with_columns([
+                sources_tb[column_name].map_elements(get_date, return_dtype=pl.Utf8).alias("date"),
+                sources_tb[column_name].map_elements(get_ref, return_dtype=pl.Utf8).alias("publication_ref"),
+            ])
 
             except Exception as e:
                 msg = f"An error occurred while augmenting the dataframe: {e}"

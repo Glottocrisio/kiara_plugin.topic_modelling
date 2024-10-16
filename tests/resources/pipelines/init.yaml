@@ -12,6 +12,10 @@ steps:
       step_id: create_table
       input_links:
         file_bundle: load_text_files.file_bundle
+    - module_type: topic_modelling.lccn_metadata
+      step_id: lccn_metadata
+      input_links:
+        corpus_table: create_table.table
     - module_type: table.pick.column
       step_id: create_array
       input_links:

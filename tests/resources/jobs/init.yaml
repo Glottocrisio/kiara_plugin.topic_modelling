@@ -1,6 +1,8 @@
 operation: "${this_dir}/../pipelines/init.yaml"
 inputs:
   load_text_files__path: "${this_dir}/../data/text_corpus/data"
+  lccn_metadata__column_name: "file_name"
+  lccn_metadata__map: [["sn84037024","sn84037025"],["La Ragione","La Rassegna"]]
   create_array__column_name: "content"
   preprocess_tokens__lowercase: true
   preprocess_tokens__isalpha: true

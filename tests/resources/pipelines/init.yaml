@@ -16,6 +16,10 @@ steps:
       step_id: lccn_metadata
       input_links:
         corpus_table: create_table.table
+    - module_type: topic_modelling.corpus_distribution
+      step_id: corpus_distribution
+      input_links:
+        corpus_table: lccn_metadata.corpus_table
     - module_type: table.pick.column
       step_id: create_array
       input_links:

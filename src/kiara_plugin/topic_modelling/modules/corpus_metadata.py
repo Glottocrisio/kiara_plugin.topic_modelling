@@ -150,13 +150,16 @@ class CorpusDistTime(KiaraModule):
         }
 
     def create_outputs_schema(self):
-        return {"dist_table": {"type": "table", "doc": "The aggregated data table."}}
+        return {"dist_table": {"type": "table", "doc": "The aggregated data table."},
+                "dist_list": {"type": "list", "doc": "The aggregated data as a list of lists."}
+        }
 
     def process(self, inputs, outputs) -> None:
         
         import duckdb # type: ignore
         import polars as pl # type: ignore
         import pyarrow as pa   # type: ignore
+        import pyarrow.compute as pc  # type: ignore
 
         agg = inputs.get_value_obj("periodicity").data
         title_col = inputs.get_value_obj("publication_ref_col").data
@@ -194,20 +197,102 @@ class CorpusDistTime(KiaraModule):
                 f"Could not convert time column to a valid date format. Please check the pattern of source values."
             )
 
-        if agg == "month":
-            query = f"SELECT EXTRACT(MONTH FROM date) AS month, EXTRACT(YEAR FROM date) AS year, {title_col}, COUNT(*) as count FROM sources_tb GROUP BY {title_col}, EXTRACT(YEAR FROM date), EXTRACT(MONTH FROM date)"  # noqa
-        elif agg == "year":
-            query = f"SELECT EXTRACT(YEAR FROM date) AS year, {title_col}, COUNT(*) as count FROM sources_tb GROUP BY {title_col}, EXTRACT(YEAR FROM date)"  # noqa
-        elif agg == "day":
-            query = f"SELECT date, {title_col}, COUNT(*) as count FROM sources_tb GROUP BY {title_col}, date"  # noqa
-        
-        else:
-            raise KiaraProcessingException(
-                f'Please check the value chosen for periodicity. Supported values are "day", "month" or "year"'
+
+        if agg == 'month':
+            query = f"""
+            SELECT strptime(concat(CAST(month AS VARCHAR), '/', CAST(year AS VARCHAR)), '%m/%Y') as date, 
+                {title_col} as publication_name, 
+                count 
+            FROM (
+                SELECT EXTRACT(year FROM date) as year, 
+                    EXTRACT(month FROM date) as month, 
+                    {title_col}, 
+                    COUNT(*) as count 
+                FROM sources 
+                GROUP BY {title_col}, EXTRACT(year FROM date), EXTRACT(month FROM date)
             )
+            """
+        elif agg == 'year':
+            query = f"""
+            SELECT strptime(CAST(year AS VARCHAR), '%Y') as date, 
+                {title_col} as publication_name, 
+                count 
+            FROM (
+                SELECT EXTRACT(year FROM date) as year, 
+                    {title_col}, 
+                    COUNT(*) as count 
+                FROM sources 
+                GROUP BY {title_col}, EXTRACT(year FROM date)
+            )
+            """
+        elif agg == 'day':
+            query = f"""
+            SELECT strptime(concat('01/', CAST(month AS VARCHAR), '/', CAST(year AS VARCHAR)), '%d/%m/%Y') as date, 
+                {title_col} as publication_name, 
+                count 
+            FROM (
+                SELECT EXTRACT(year FROM date) as year, 
+                    EXTRACT(month FROM date) as month, 
+                    {title_col}, 
+                    COUNT(*) as count 
+                FROM sources 
+                GROUP BY {title_col}, EXTRACT(year FROM date), EXTRACT(month FROM date), EXTRACT(day FROM date)
+            )
+            """
 
-        queried_df = duckdb.query(query)
+        # Register the PyArrow table with DuckDB
+        con = duckdb.connect(':memory:')
+        con.register('sources', sources_tb)
 
-        pa_out_table = queried_df.arrow()
+        # Execute the query
+        print(f"Executing query: {query}")
+        result = con.execute(query)
+        
 
-        outputs.set_value("dist_table", pa_out_table)
+        # Convert the result to a PyArrow table
+        queried_table = result.fetch_arrow_table()
+
+        print(f"Number of rows in queried_table: {len(queried_table)}")
+        print(f"Columns in queried_table: {queried_table.column_names}")
+
+        # Convert all columns to strings
+        try:
+            for column in queried_table.column_names:
+                print(f"Converting column: {column}")
+                new_column = pc.cast(queried_table.column(column), pa.string())
+                print(f"New column type: {new_column.type}")
+                queried_table = queried_table.set_column(
+                    queried_table.schema.get_field_index(column),
+                    column,
+                    new_column
+                )
+            print("All columns converted to strings successfully")
+        except Exception as e:
+            print(f"Error during column conversion to string: {str(e)}")
+            raise
+
+        # Convert to list of dictionaries
+        try:
+            list_of_dicts = []
+            for row_index, row in enumerate(queried_table.to_pylist()):
+                print(f"Processing row {row_index}")
+                row_dict = {"agg": agg}  # Add the agg value to each dictionary
+                for column_index, column in enumerate(queried_table.column_names):
+                    print(f"  Processing column {column_index}: {column}")
+                    try:
+                        # Directly access the column value using PyArrow
+                        value = queried_table.column(column)[row_index].as_py()
+                        print(f"    Value: {value}")
+                        row_dict[column] = value
+                    except Exception as e:
+                        print(f"    Error processing value: {str(e)}")
+                        row_dict[column] = None
+                list_of_dicts.append(row_dict)
+            print(f"Successfully converted to list of dicts. Number of dicts: {len(list_of_dicts)}")
+            print(f"Sample dict with 'agg': {list_of_dicts[0]}")  # Print a sample dict to verify
+        except Exception as e:
+            print(f"Error during conversion to list of dicts: {str(e)}")
+            raise
+
+        outputs.set_value("dist_table", queried_table)
+        outputs.set_value("dist_list", list_of_dicts)

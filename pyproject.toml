@@ -55,6 +55,7 @@ dependencies = [
     "nltk==3.8.1",
     "requests==2.32.3",
     "gensim==4.3.3",
+    "observable-jupyter==0.1.14",
 ]
 dynamic = ["version"]
 

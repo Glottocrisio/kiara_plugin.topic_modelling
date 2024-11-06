@@ -109,6 +109,12 @@ class PreprocessTokens(KiaraModule):
                 "optional": True,
                 "default": False
             },
+            "isdigit": {
+                "type": "boolean",
+                "doc": "Whether to remove tokens that contain only numbers.",
+                "optional": True,
+                "default": False
+            },
             "min_length": {
                 "type": "integer",
                 "doc": "Whether to remove tokens that contain less than min_length characters.",
@@ -136,6 +142,7 @@ class PreprocessTokens(KiaraModule):
 
         do_lowercase = inputs.get_value_data("lowercase")
         do_isalpha = inputs.get_value_data("isalpha")
+        do_isdigit = inputs.get_value_data("isdigit")
         min_length = inputs.get_value_data("min_length")
 
         def preprocess_token(token):
@@ -146,6 +153,9 @@ class PreprocessTokens(KiaraModule):
                 token = token.lower()
             
             if do_isalpha and not token.isalpha():
+                return None
+            
+            if do_isdigit and not token.isdigit():
                 return None
             
             if min_length and len(token) < min_length:

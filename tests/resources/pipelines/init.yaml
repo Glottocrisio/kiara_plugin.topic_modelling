@@ -39,7 +39,11 @@ steps:
       input_links:
         tokens_array: preprocess_tokens.tokens_array
         stopwords_list: create_stopwords_list.stopwords_list
+    - module_type: topic_modelling.get_bigrams
+      step_id: get_bigrams
+      input_links:
+        tokens_array: remove_stopwords.tokens_array
     - module_type: topic_modelling.lda
       step_id: lda
       input_links:
-        tokens_array: remove_stopwords.tokens_array
+        tokens_array: get_bigrams.tokens_array

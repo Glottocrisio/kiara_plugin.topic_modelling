@@ -174,3 +174,67 @@ class PreprocessTokens(KiaraModule):
         processed_array = pa.array(processed_tokens)
 
         outputs.set_value("tokens_array", processed_array)
+
+class GetBigrams(KiaraModule):
+    """
+    This module creates bigrams in a tokenized corpus.
+
+    """
+
+    _module_type_name = "topic_modelling.get_bigrams"
+
+    def create_inputs_schema(self):
+        return {
+            "tokens_array": {
+                "type": "array",
+                "doc": "Array that contains the tokens.",
+            },
+            "threshold": {
+                "type": "integer",
+                "doc": "Score threshold for forming the phrases (higher means fewer phrases).",
+                "optional": True,
+                "default": None,
+            },
+            "min_count": {
+                "type": "integer",
+                "doc": "Ignore all words and bigrams with total collected count lower than this value.",
+                "optional": True,
+                "default": None,
+            }
+        }
+
+    def create_outputs_schema(self):
+        return {
+            "tokens_array": {
+                "type": "array",
+                "doc": "The array that contains the pre-processed tokens."
+            }
+        }
+
+    def process(self, inputs, outputs):
+        import polars as pl # type: ignore
+        import pyarrow as pa # type: ignore
+        import gensim # type: ignore
+
+        tokens_array = inputs.get_value_data("tokens_array")
+        tokens_array_pa = tokens_array.arrow_array
+        
+        tokens_list = tokens_array_pa.to_pylist()
+
+        threshold = inputs.get_value_data("threshold")
+        min_count = inputs.get_value_data("min_count")
+
+        phrase_kwargs = {}
+        if threshold is not None:
+            phrase_kwargs['threshold'] = threshold
+        if min_count is not None:
+            phrase_kwargs['min_count'] = min_count
+
+        bigram = gensim.models.Phrases(tokens_list, **phrase_kwargs)
+        bigram_mod = gensim.models.phrases.Phraser(bigram)
+
+        processed_bigrams = [bigram_mod[doc] for doc in tokens_list]
+
+        processed_array = pa.array(processed_bigrams)
+
+        outputs.set_value("tokens_array", processed_array)
